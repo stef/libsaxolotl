@@ -46,7 +46,7 @@ decrypts a message /in/ using the axolotl context ctx into /out/;
 
 a quick example for exchange between alice and bob:
 
-#+EXAMPLE_SRC
+#+BEGIN_EXAMPLE
 #include "axolotl.h"
 
 void main(void) {
