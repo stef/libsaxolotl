@@ -78,7 +78,7 @@ typedef struct {
 
 void axolotl_genid(Axolotl_KeyPair * keys);
 void axolotl_setup(Axolotl_InitMsg *initmsg, Axolotl_ctx *ctx, const Axolotl_KeyPair *keypair);
-int axolotl_accept(Axolotl_ctx* ctx, const Axolotl_InitMsg *init);
+int axolotl_handshake(Axolotl_ctx* ctx, const Axolotl_InitMsg *init);
 void axolotl_box(Axolotl_ctx *ctx, uint8_t *out, int *out_len, const uint8_t *in, const int in_len);
 int axolotl_box_open(Axolotl_ctx *ctx, uint8_t *out, int *out_len, const uint8_t *in, const int in_len);
 

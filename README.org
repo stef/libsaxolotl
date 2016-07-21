@@ -35,7 +35,7 @@ Generating and serving many of these initmsgs centrally allows for
 asynchronous messaging. but this is not necessary.
 
 #+BEGIN_EXAMPLE
-int axolotl_accept(Axolotl_ctx* ctx, const Axolotl_InitMsg *init);
+int axolotl_handshake(Axolotl_ctx* ctx, const Axolotl_InitMsg *init);
 #+END_EXAMPLE
 
 Receives an initial handshake and derives the initial context. ctx is

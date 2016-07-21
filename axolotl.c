@@ -140,7 +140,7 @@ static int tripledh(uint8_t *mk, const Axolotl_ctx *ctx, const Axolotl_InitMsg *
   return 0;
 }
 
-int axolotl_accept(Axolotl_ctx* ctx, const Axolotl_InitMsg *init) {
+int axolotl_handshake(Axolotl_ctx* ctx, const Axolotl_InitMsg *init) {
   /*
   as per https://github.com/trevp/axolotl/wiki/newversion (Nov 19, 2013 · 41 revisions)
 

@@ -44,8 +44,8 @@ int main(void) {
   // theoretically alice and bob exchange intit msgs
 
   // both derive the ctx from the init msg
-  axolotl_accept(&alice_ctx, &bob_init);
-  axolotl_accept(&bob_ctx, &alice_init);
+  axolotl_handshake(&alice_ctx, &bob_init);
+  axolotl_handshake(&bob_ctx, &alice_init);
 
   printf("alice\n");
   print_ctx(&alice_ctx);
