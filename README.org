@@ -1,6 +1,9 @@
 * libsaxolotl v0.1
 libsaxolotl implements the Axoltol protocol using curve25519 from libsodium in a LGPLv3+ library.
 
+this library implements a variation, where the skipped header keys are
+not retained and used when trying to decrypt out-of-band messages.
+
 The axolotl context is 769 bytes, with 16 slots for the latest missed
 message keys. The initial handshake message (which can be produced in
 bulk and used for setting up channels asynchronously) is 96
