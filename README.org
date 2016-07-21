@@ -1,0 +1,78 @@
+* libsaxolotl v0.1
+libsaxolotl implements the Axoltol protocol using curve25519 from libsodium in a LGPLv3+ library.
+
+** API
+#+BEGIN_EXAMPLE
+void axolotl_genid(Axolotl_KeyPair * keys);
+#+END_EXAMPLE
+
+Initializes a long-term identity key. This long-term key is the authenticating the persona to all peers.
+
+#+BEGIN_EXAMPLE
+void axolotl_setup(Axolotl_InitMsg *initmsg, Axolotl_ctx *ctx, const Axolotl_KeyPair *keypair);
+#+END_EXAMPLE
+
+Creates the initial handshake to be exchanged for setting up an
+Axolotl channel. The pointer to initmsg is the initial packet that
+needs to be shared with *1* peer, reuse of these initmsgs is not
+recommended. ctx is a pointer to a new Axolotl_ctx object, which needs
+to be preserved across the life-time of the connection. keypair is the
+long-term identity key for the persona generating the handshake message.
+
+generating and serving many of these centrally allows for asynchronous
+messaging. but this is not necessary.
+
+#+BEGIN_EXAMPLE
+int axolotl_accept(Axolotl_ctx* ctx, const Axolotl_InitMsg *init);
+#+END_EXAMPLE
+
+Receives an initial handshake and derives the initial context. ctx is
+the persistent context of the Axolotl channel. initmsg is one of the
+communicating peers initmsgs, this should be discarded, and never used
+again after using once. Both peers must execute this with each others
+initmsgs before they can exchange messages.
+
+#+BEGIN_EXAMPLE
+void axolotl_box(Axolotl_ctx *ctx, uint8_t *out, int *out_len, const uint8_t *in, const int in_len);
+#+END_EXAMPLE
+
+Encrypts a message /in/ using the axolotl context ctx into /out/;
+
+#+BEGIN_EXAMPLE
+int axolotl_box_open(Axolotl_ctx *ctx, uint8_t *out, int *out_len, const uint8_t *in, const int in_len);
+#+END_EXAMPLE
+
+decrypts a message /in/ using the axolotl context ctx into /out/;
+
+a quick example for exchange between alice and bob:
+
+#+EXAMPLE_SRC
+#include "axolotl.h"
+
+void main(void) {
+  Axolotl_ctx alice_ctx, bob_ctx;
+  Axolotl_KeyPair alice_id, bob_id;
+  Axolotl_InitMsg alice_init, bob_init;
+
+  // init long-term identity keys
+  axolotl_genid(&alice_id);
+  axolotl_genid(&bob_id);
+
+  axolotl_setup(&alice_init, &alice_ctx, &alice_id);
+  axolotl_setup(&bob_init, &bob_ctx, &bob_id);
+
+  // both derive the ctx from their exchanged init msg
+  axolotl_accept(&alice_ctx, &bob_init);
+  axolotl_accept(&bob_ctx, &alice_init);
+
+  uint8_t out[4096], out2[4096];
+  int outlen,outlen2;
+  axolotl_box(&alice_ctx, out, &outlen, (const uint8_t *) "howdy", 6);
+  if(axolotl_box_open(&bob_ctx, out2, &outlen2, out, outlen)!=0) {
+    // fail
+    printf("fail :/\n");
+    exit(1);
+  }
+  printf("%d %s\n", outlen2, out2);
+}
+#+END_EXAMPLE
