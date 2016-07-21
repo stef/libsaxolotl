@@ -21,7 +21,6 @@
 typedef struct {
   uint8_t id;
   uint8_t mk[crypto_scalarmult_curve25519_BYTES];
-  uint8_t hk[crypto_scalarmult_curve25519_BYTES];
 } __attribute((packed)) BagEntry;
 
 typedef struct {

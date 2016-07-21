@@ -363,7 +363,6 @@ static int try_skipped(Axolotl_ctx *ctx, uint8_t *out, int *outlen,
   BagEntry *curentry;
   for(i=0;i<BagSize;i++) {
     if(ctx->skipped_HK_MK[i].id==0xff || ctx->skipped_HK_MK[i].id==0) continue;
-    if(crypto_secretbox_open(headers, hcrypt, PADDEDHCRYPTLEN, hnonce, ctx->skipped_HK_MK[i].hk)!=0) continue;
     if(crypto_secretbox_open(paddedout, mcrypt, mcrypt_len, mnonce, ctx->skipped_HK_MK[i].mk)!=0) continue;
     memcpy(out, paddedout+32, sizeof(paddedout) - 32);
     *outlen = sizeof(paddedout)-32;
@@ -374,7 +373,7 @@ static int try_skipped(Axolotl_ctx *ctx, uint8_t *out, int *outlen,
 }
 
 static void stage_skipped_keys(uint8_t* ckp, uint8_t* mk,  // output
-                               const uint8_t *hk, const long long nr, const long long np, uint8_t *ck, // input
+                               const long long nr, const long long np, uint8_t *ck, // input
                                BagEntry stagedkeys[BagSize]) {
   /*
     stage_skipped_header_and_message_keys() : Given a current header
@@ -402,7 +401,6 @@ static void stage_skipped_keys(uint8_t* ckp, uint8_t* mk,  // output
     crypto_generichash(slot->mk, crypto_secretbox_KEYBYTES, // mk=
                          _ckp, crypto_secretbox_KEYBYTES,  // h(ck,
                          (uint8_t*) "MK", 2);              // "MK")
-    memcpy(slot->hk, hk, crypto_secretbox_KEYBYTES);
     crypto_generichash(_ckp, crypto_secretbox_KEYBYTES,   // mk=
                        _ckp, crypto_secretbox_KEYBYTES,   // h(ck,
                        (uint8_t*) "CK", 2);               // "MK")
@@ -513,7 +511,7 @@ int axolotl_box_open(Axolotl_ctx *ctx, uint8_t *out, int *out_len, const uint8_t
     memcpy((uint8_t*) &np, headers+32, sizeof(long long));
     // CKp, MK = self.stage_skipped_keys(self.HKr, self.Nr, Np, self.CKr)
     //void stage_skipped_keys(uint8_t* ckp, uint8_t* mk, const uint8_t *hk, const long long nr, const long long np, const uint8_t *ck) {
-    stage_skipped_keys(ckp, mk, ctx->hkr, ctx->nr, np, ctx->ckr, stagedkeys);
+    stage_skipped_keys(ckp, mk, ctx->nr, np, ctx->ckr, stagedkeys);
 #if AXOLOTL_DEBUG
       print_key("mk", mk);
       print_key("mnonce", mnonce);
@@ -581,7 +579,7 @@ int axolotl_box_open(Axolotl_ctx *ctx, uint8_t *out, int *out_len, const uint8_t
     memcpy(dhrp, headers+32+sizeof(long long)*2, crypto_secretbox_KEYBYTES);
     // self.stage_skipped_keys(self.HKr, self.Nr, PNp, self.CKr)
     //void stage_skipped_keys(uint8_t* ckp, uint8_t* mk, const uint8_t *hk, const long long nr, const long long np, const uint8_t *ck) {
-    stage_skipped_keys(NULL, NULL, ctx->hkr, ctx->nr, pnp, ctx->ckr, stagedkeys);
+    stage_skipped_keys(NULL, NULL, ctx->nr, pnp, ctx->ckr, stagedkeys);
     uint8_t rkp[crypto_secretbox_KEYBYTES];
     if(crypto_scalarmult_curve25519(tmp, ctx->dhrs.sk, ctx->dhrr)!=0) {
 #if AXOLOTL_DEBUG
@@ -612,7 +610,7 @@ int axolotl_box_open(Axolotl_ctx *ctx, uint8_t *out, int *out_len, const uint8_t
     }
     // CKp, MK = self.stage_skipped_keys(HKp, 0, Np, CKp)
     //void stage_skipped_keys(uint8_t* ckp, uint8_t* mk, const uint8_t *hk, const long long nr, const long long np, const uint8_t *ck) {
-    stage_skipped_keys(ckp, mk, hkp, 0LL, np, ckp, stagedkeys);
+    stage_skipped_keys(ckp, mk, 0LL, np, ckp, stagedkeys);
 
 #if AXOLOTL_DEBUG
       print_key("mk", mk);
@@ -673,7 +671,6 @@ int axolotl_box_open(Axolotl_ctx *ctx, uint8_t *out, int *out_len, const uint8_t
   for(i=0;i<BagSize;i++) {
     if(stagedkeys[i].id==0xff || stagedkeys[i].id==0) continue;
     curentry = bag_put(ctx->skipped_HK_MK);
-    memcpy(curentry->hk, &(stagedkeys[i].hk), crypto_secretbox_KEYBYTES);
     memcpy(curentry->mk, &(stagedkeys[i].mk), crypto_secretbox_KEYBYTES);
     bag_del(&(stagedkeys[i]));
   }
@@ -813,7 +810,6 @@ static void bag_init(BagEntry bag[]) {
 static void bag_del(BagEntry *bag) {
   bag->id=0;
   memset(bag->mk,0,crypto_scalarmult_curve25519_BYTES);
-  memset(bag->hk,0,crypto_scalarmult_curve25519_BYTES);
 }
 
 #if AXOLOTL_DEBUG
@@ -827,7 +823,6 @@ static void bag_dump(BagEntry bag[]) {
     } else {
       printf("%2d %3d", i, bag[i].id);
       print_key("\tmk", bag[i].mk);
-      print_key("\thk", bag[i].hk);
     }
   }
 }
