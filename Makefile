@@ -13,7 +13,6 @@ axolotl-dbg.o: axolotl.c axolotl.h
 axolotl.o: axolotl.c
 
 demo: demo.c axolotl.o
-	$(CC) $(CFLAGS) $(LDFLAGS) $^ -o $@
 
 clean:
 	rm *.o test
