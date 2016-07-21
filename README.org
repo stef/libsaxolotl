@@ -28,8 +28,11 @@ recommended. ctx is a pointer to a new Axolotl_ctx object, which needs
 to be preserved across the life-time of the connection. keypair is the
 long-term identity key for the persona generating the handshake message.
 
-generating and serving many of these centrally allows for asynchronous
-messaging. but this is not necessary.
+It is important to note that each initmsg is coupled with a context,
+for correct setup the context according to the initmsg must be used.
+
+Generating and serving many of these initmsgs centrally allows for
+asynchronous messaging. but this is not necessary.
 
 #+BEGIN_EXAMPLE
 int axolotl_accept(Axolotl_ctx* ctx, const Axolotl_InitMsg *init);
@@ -40,6 +43,9 @@ the persistent context of the Axolotl channel. initmsg is one of the
 communicating peers initmsgs, this should be discarded, and never used
 again after using once. Both peers must execute this with each others
 initmsgs before they can exchange messages.
+
+The ctx must be the one coupled with the initmsg sent to the peer. The
+initmsg similarly must be the one associated with the ctx of the peer.
 
 #+BEGIN_EXAMPLE
 void axolotl_box(Axolotl_ctx *ctx, uint8_t *out, int *out_len, const uint8_t *in, const int in_len);
