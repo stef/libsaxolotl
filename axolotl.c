@@ -241,6 +241,7 @@ int axolotl_accept(Axolotl_ctx* ctx, const Axolotl_InitMsg *init) {
   ctx->nr = 0;
   ctx->pns = 0;
   memset(mk, 0, sizeof(mk));
+  return 0;
 }
 
 void axolotl_box(Axolotl_ctx *ctx, uint8_t *out, int *out_len, const uint8_t *in, const int in_len) {
@@ -357,10 +358,8 @@ static int try_skipped(Axolotl_ctx *ctx, uint8_t *out, int *outlen,
             del self.skipped_HK_MK[mk]
             return msg
    */
-  uint8_t headers[PADDEDHCRYPTLEN];
   uint8_t paddedout[mcrypt_len];
   int i;
-  BagEntry *curentry;
   for(i=0;i<BagSize;i++) {
     if(ctx->skipped_HK_MK[i].id==0xff || ctx->skipped_HK_MK[i].id==0) continue;
     if(crypto_secretbox_open(paddedout, mcrypt, mcrypt_len, mnonce, ctx->skipped_HK_MK[i].mk)!=0) continue;
@@ -743,7 +742,7 @@ static BagEntry* bag_put(BagEntry bag[]) {
   int i;
   uint8_t minid=0xff,
     maxid=0,
-    idx=0xff, minidx=0xff, maxidx=0xff, delidx=0xff;
+    idx=0xff, minidx=0xff, delidx=0xff;
 
   // iterate through bag, looking for empty spaces, max and min ids.
   for(i=0;i<BagSize;i++) {
@@ -753,7 +752,6 @@ static BagEntry* bag_put(BagEntry bag[]) {
     }
     if(bag[i].id>maxid && bag[i].id!=0xff) {
       maxid=bag[i].id;
-      maxidx=i;
     }
     if(bag[i].id==0xff && idx==0xff) {
       // found empty space

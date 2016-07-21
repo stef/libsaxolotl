@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-void main(void) {
+int main(void) {
   Axolotl_ctx alice_ctx, bob_ctx;
   Axolotl_KeyPair alice_id, bob_id;
   Axolotl_InitMsg alice_init, bob_init;
@@ -27,4 +27,5 @@ void main(void) {
     exit(1);
   }
   printf("%d %s\n", outlen2, out2);
+  return 0;
 }

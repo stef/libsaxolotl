@@ -22,12 +22,13 @@
 #include "crypto_secretbox.h"
 #include "axolotl.h"
 
-void main(void) {
+int main(void) {
   Axolotl_ctx alice_ctx, bob_ctx;
   Axolotl_KeyPair alice_id, bob_id;
   Axolotl_InitMsg alice_init, bob_init;
 
   printf("sizeof axolotl ctx: %d\n", sizeof(Axolotl_ctx));
+  printf("sizeof axolotl initmsg: %d\n", sizeof(Axolotl_InitMsg));
   // init long-term identity keys (could also be stored seperately for all new "connections"
   axolotl_genid(&alice_id);
   axolotl_genid(&bob_id);
@@ -310,4 +311,5 @@ void main(void) {
     exit(1);
   }
   printf("%d %s\n", outlen2, out2);
+  return 0;
 }

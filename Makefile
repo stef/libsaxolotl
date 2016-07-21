@@ -1,5 +1,5 @@
 CC=gcc
-CFLAGS+= -g -I/usr/include/sodium
+CFLAGS+= -g -Wall -I/usr/include/sodium
 LDFLAGS+= -lsodium
 
 all: test demo
@@ -15,5 +15,5 @@ axolotl.o: axolotl.c
 demo: demo.c axolotl.o
 
 clean:
-	rm *.o test
+	rm *.o test demo
 
