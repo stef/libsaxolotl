@@ -25,11 +25,11 @@ int main(int argc, char** argv) {
 
   if((inlen=read(0,in,sizeof(in)))>0) {
     axolotl_box(&ctx, out, &outlen, in, inlen);
-  }
-  write(1,out,outlen);
+    write(1,out,outlen);
 
-  fseek(fd, 0, SEEK_SET);
-  fwrite(&ctx, sizeof(ctx),1,fd);
+    fseek(fd, 0, SEEK_SET);
+    fwrite(&ctx, sizeof(ctx),1,fd);
+  }
   fclose(fd);
   return 0;
 }
