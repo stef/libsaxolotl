@@ -77,8 +77,8 @@ void main(void) {
   axolotl_setup(&bob_init, &bob_ctx, &bob_id);
 
   // both derive the ctx from their exchanged init msg
-  axolotl_accept(&alice_ctx, &bob_init);
-  axolotl_accept(&bob_ctx, &alice_init);
+  axolotl_handshake(&alice_ctx, &bob_init);
+  axolotl_handshake(&bob_ctx, &alice_init);
 
   uint8_t out[4096], out2[4096];
   int outlen,outlen2;
