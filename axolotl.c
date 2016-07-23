@@ -85,49 +85,31 @@ static int tripledh(uint8_t *mk, const Axolotl_ctx *ctx, const Axolotl_InitMsg *
   if(isalice(ctx) <= 0) {
     // 3 DHs
     if(crypto_scalarmult_curve25519(ptr, ctx->dhis.sk, init->ephemeralkey)!=0) {
-#if AXOLOTL_DEBUG
-        printf("fail\n");
-#endif
       return 1;
     }
     ptr+=crypto_scalarmult_curve25519_BYTES;
 
     if(crypto_scalarmult_curve25519(ptr, ctx->eph.sk, init->identitykey)!=0) {
-#if AXOLOTL_DEBUG
-      printf("fail\n");
-#endif
       return 1;
     }
     ptr+=crypto_scalarmult_curve25519_BYTES;
 
     if(crypto_scalarmult_curve25519(ptr, ctx->eph.sk, init->ephemeralkey)!=0) {
-#if AXOLOTL_DEBUG
-      printf("fail\n");
-#endif
       return 1;
     }
   } else {
     // 3 DHs
     if(crypto_scalarmult_curve25519(ptr, ctx->eph.sk, init->identitykey)!=0) {
-#if AXOLOTL_DEBUG
-      printf("fail\n");
-#endif
       return 1;
     }
     ptr+=crypto_scalarmult_curve25519_BYTES;
 
     if(crypto_scalarmult_curve25519(ptr, ctx->dhis.sk, init->ephemeralkey)!=0) {
-#if AXOLOTL_DEBUG
-      printf("fail\n");
-#endif
       return 1;
     }
     ptr+=crypto_scalarmult_curve25519_BYTES;
 
     if(crypto_scalarmult_curve25519(ptr, ctx->eph.sk, init->ephemeralkey)!=0) {
-#if AXOLOTL_DEBUG
-      printf("fail\n");
-#endif
       return 1;
     }
   }
