@@ -18,34 +18,34 @@ void axolotl_genid(Axolotl_KeyPair * keys);
 Initializes a long-term identity key. This long-term key is the authenticating the persona to all peers.
 
 #+BEGIN_EXAMPLE
-void axolotl_setup(Axolotl_InitMsg *initmsg, Axolotl_ctx *ctx, const Axolotl_KeyPair *keypair);
+void axolotl_prekey(Axolotl_PreKey *prekey, Axolotl_ctx *ctx, const Axolotl_KeyPair *keypair);
 #+END_EXAMPLE
 
 Creates the initial handshake to be exchanged for setting up an
-Axolotl channel. The pointer to initmsg is the initial packet that
-needs to be shared with *1* peer, reuse of these initmsgs is not
+Axolotl channel. The pointer to the prekey is the initial packet that
+needs to be shared with *1* peer, reuse of these prekeys is not
 recommended. ctx is a pointer to a new Axolotl_ctx object, which needs
 to be preserved across the life-time of the connection. keypair is the
 long-term identity key for the persona generating the handshake message.
 
-It is important to note that each initmsg is coupled with a context,
-for correct setup the context according to the initmsg must be used.
+It is important to note that each prekey is coupled with a context,
+for correct setup the context according to the prekey must be used.
 
-Generating and serving many of these initmsgs centrally allows for
+Generating and serving many of these prekeys centrally allows for
 asynchronous messaging. but this is not necessary.
 
 #+BEGIN_EXAMPLE
-int axolotl_handshake(Axolotl_ctx* ctx, const Axolotl_InitMsg *init);
+int axolotl_handshake(Axolotl_ctx* ctx, const Axolotl_PreKey *prekey);
 #+END_EXAMPLE
 
 Receives an initial handshake and derives the initial context. ctx is
-the persistent context of the Axolotl channel. initmsg is one of the
-communicating peers initmsgs, this should be discarded, and never used
+the persistent context of the Axolotl channel. prekey is one of the
+communicating peers prekeys, this should be discarded, and never used
 again after using once. Both peers must execute this with each others
-initmsgs before they can exchange messages.
+prekeys before they can exchange messages.
 
-The ctx must be the one coupled with the initmsg sent to the peer. The
-initmsg similarly must be the one associated with the ctx of the peer.
+The ctx must be the one coupled with the prekeys sent to the peer. The
+prekeys similarly must be the one associated with the ctx of the peer.
 
 #+BEGIN_EXAMPLE
 void axolotl_box(Axolotl_ctx *ctx, uint8_t *out, int *out_len, const uint8_t *in, const int in_len);
@@ -67,18 +67,18 @@ a quick example for exchange between alice and bob:
 void main(void) {
   Axolotl_ctx alice_ctx, bob_ctx;
   Axolotl_KeyPair alice_id, bob_id;
-  Axolotl_InitMsg alice_init, bob_init;
+  Axolotl_PreKey alice_prekey, bob_prekey;
 
   // init long-term identity keys
   axolotl_genid(&alice_id);
   axolotl_genid(&bob_id);
 
-  axolotl_setup(&alice_init, &alice_ctx, &alice_id);
-  axolotl_setup(&bob_init, &bob_ctx, &bob_id);
+  axolotl_prekey(&alice_prekey, &alice_ctx, &alice_id);
+  axolotl_prekey(&bob_prekey, &bob_ctx, &bob_id);
 
-  // both derive the ctx from their exchanged init msg
-  axolotl_handshake(&alice_ctx, &bob_init);
-  axolotl_handshake(&bob_ctx, &alice_init);
+  // both derive the ctx from their exchanged prekey msg
+  axolotl_handshake(&alice_ctx, &bob_prekey);
+  axolotl_handshake(&bob_ctx, &alice_prekey);
 
   uint8_t out[4096], out2[4096];
   int outlen,outlen2;
