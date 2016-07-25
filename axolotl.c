@@ -564,26 +564,26 @@ int axolotl_box_open(Axolotl_ctx *ctx, uint8_t *out, int *out_len, const uint8_t
 #endif
       return 1;
     }
-    crypto_generichash(rkp, crypto_secretbox_KEYBYTES,           // output
-                       ctx->rk, crypto_secretbox_KEYBYTES,       // msg
-                       tmp, crypto_scalarmult_curve25519_BYTES); // no key
+    crypto_generichash(rkp, crypto_secretbox_KEYBYTES,
+                       ctx->rk, crypto_secretbox_KEYBYTES,
+                       tmp, crypto_scalarmult_curve25519_BYTES);
     uint8_t hkp[crypto_secretbox_KEYBYTES];
     memcpy(hkp, ctx->nhkr, crypto_secretbox_KEYBYTES);
     uint8_t nhkp[crypto_secretbox_KEYBYTES];
     if(isalice(ctx) <= 0) {
-      crypto_generichash(nhkp, crypto_secretbox_KEYBYTES, // output
-                         rkp, crypto_secretbox_KEYBYTES,  // msg
-                         (uint8_t*) "NHKr", 4);           // no key
-      crypto_generichash(ckp, crypto_secretbox_KEYBYTES,  // output
-                         rkp, crypto_secretbox_KEYBYTES,  // msg
-                         (uint8_t*) "CKr", 3);            // no key
+      crypto_generichash(nhkp, crypto_secretbox_KEYBYTES,
+                         rkp, crypto_secretbox_KEYBYTES,
+                         (uint8_t*) "NHKr", 4);
+      crypto_generichash(ckp, crypto_secretbox_KEYBYTES,
+                         rkp, crypto_secretbox_KEYBYTES,
+                         (uint8_t*) "CKr", 3);
     } else {
-      crypto_generichash(nhkp, crypto_secretbox_KEYBYTES, // output
-                         rkp, crypto_secretbox_KEYBYTES,  // msg
-                         (uint8_t*) "NHKs", 4);           // no key
-      crypto_generichash(ckp, crypto_secretbox_KEYBYTES,  // output
-                         rkp, crypto_secretbox_KEYBYTES,  // msg
-                         (uint8_t*) "CKs", 3);            // no key
+      crypto_generichash(nhkp, crypto_secretbox_KEYBYTES,
+                         rkp, crypto_secretbox_KEYBYTES,
+                         (uint8_t*) "NHKs", 4);
+      crypto_generichash(ckp, crypto_secretbox_KEYBYTES,
+                         rkp, crypto_secretbox_KEYBYTES,
+                         (uint8_t*) "CKs", 3);
     }
     // CKp, MK = stage_skipped_keys(HKp, 0, Np, CKp)
     stage_skipped_keys(ckp, mk, 0LL, np, ckp, stagedkeys);
@@ -619,19 +619,19 @@ int axolotl_box_open(Axolotl_ctx *ctx, uint8_t *out, int *out_len, const uint8_t
                        tmp, crypto_scalarmult_curve25519_BYTES); // tmp)
     memcpy(ctx->hks, ctx->nhks, crypto_secretbox_KEYBYTES);
     if(isalice(ctx) <= 0) {
-      crypto_generichash(ctx->nhks, crypto_secretbox_KEYBYTES, // output
-                         ctx->rk, crypto_secretbox_KEYBYTES,   // msg
-                         (uint8_t*) "NHKs", 4);                // no key
-      crypto_generichash(ctx->cks, crypto_secretbox_KEYBYTES,  // output
-                         ctx->rk, crypto_secretbox_KEYBYTES,   // msg
-                         (uint8_t*) "CKs", 3);                 // no key
+      crypto_generichash(ctx->nhks, crypto_secretbox_KEYBYTES,
+                         ctx->rk, crypto_secretbox_KEYBYTES,
+                         (uint8_t*) "NHKs", 4);
+      crypto_generichash(ctx->cks, crypto_secretbox_KEYBYTES,
+                         ctx->rk, crypto_secretbox_KEYBYTES,
+                         (uint8_t*) "CKs", 3);
     } else {
-      crypto_generichash(ctx->nhks, crypto_secretbox_KEYBYTES, // output
-                         ctx->rk, crypto_secretbox_KEYBYTES,   // msg
-                         (uint8_t*) "NHKr", 4);                // no key
-      crypto_generichash(ctx->cks, crypto_secretbox_KEYBYTES,  // output
-                         ctx->rk, crypto_secretbox_KEYBYTES,   // msg
-                         (uint8_t*) "CKr", 3);                 // no key
+      crypto_generichash(ctx->nhks, crypto_secretbox_KEYBYTES,
+                         ctx->rk, crypto_secretbox_KEYBYTES,
+                         (uint8_t*) "NHKr", 4);
+      crypto_generichash(ctx->cks, crypto_secretbox_KEYBYTES,
+                         ctx->rk, crypto_secretbox_KEYBYTES,
+                         (uint8_t*) "CKr", 3);
     }
     memset(ctx->dhrs.sk, 0, crypto_secretbox_KEYBYTES);
   }
@@ -699,9 +699,7 @@ static void bubble_sort(uint8_t ptr[BagSize][2],int s) {
   uint8_t temp;
   for(i=1;i<s;i++) {
     for(j=0;j<s-i;j++) {
-      //if(*(ptr+j)>*(ptr+j+1)) {
       if(ptr[j][0]>(ptr[j+1][0])) {
-      //if(memcmp((char*) ptr[j], (char*) ptr[j+1],32)==1) {
         temp=ptr[j][0];
         ptr[j][0]=ptr[j+1][0];
         ptr[j+1][0]=temp;
