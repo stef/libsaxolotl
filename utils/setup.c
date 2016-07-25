@@ -8,7 +8,7 @@
 int main(int argc, char** argv) {
   Axolotl_KeyPair id;
   Axolotl_ctx ctx;
-  Axolotl_InitMsg init;
+  Axolotl_PreKey prekey;
 
   if(argc<2) {
     printf("%s <prefix>\n", argv[0]);
@@ -18,7 +18,7 @@ int main(int argc, char** argv) {
   // read in identity key from stdin
   read(0,&id,sizeof(id));
 
-  axolotl_setup(&init, &ctx, &id);
+  axolotl_prekey(&prekey, &ctx, &id);
 
   size_t fname_len = strlen(argv[1]);
   char fname[fname_len+4+1];
@@ -37,7 +37,7 @@ int main(int argc, char** argv) {
     printf("cannot open %s\n", fname);
     exit(1);
   }
-  fwrite(&init, sizeof(init),1,fd);
+  fwrite(&prekey, sizeof(prekey),1,fd);
   fclose(fd);
   return 0;
 }

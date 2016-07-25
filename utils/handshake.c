@@ -7,15 +7,15 @@
 
 int main(int argc, char** argv) {
   Axolotl_ctx ctx;
-  Axolotl_InitMsg init;
+  Axolotl_PreKey prekey;
 
   if(argc<2) {
-    printf("%s <ctx> <initmsg\n", argv[0]);
+    printf("%s <ctx> <prekey\n", argv[0]);
     exit(1);
   }
 
   // read in identity key from stdin
-  read(0,&init,sizeof(init));
+  read(0,&prekey,sizeof(prekey));
 
   FILE* fd=fopen(argv[1], "r+");
   if(fd==NULL) {
@@ -24,7 +24,7 @@ int main(int argc, char** argv) {
   }
   fread(&ctx, sizeof(ctx),1,fd);
 
-  axolotl_handshake(&ctx, &init);
+  axolotl_handshake(&ctx, &prekey);
 
   fseek(fd, 0, SEEK_SET);
   fwrite(&ctx, sizeof(ctx),1,fd);

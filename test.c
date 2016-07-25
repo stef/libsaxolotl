@@ -25,10 +25,10 @@
 int main(void) {
   Axolotl_ctx alice_ctx, bob_ctx;
   Axolotl_KeyPair alice_id, bob_id;
-  Axolotl_InitMsg alice_init, bob_init;
+  Axolotl_PreKey alice_prekey, bob_prekey;
 
   printf("sizeof axolotl ctx: %d\n", sizeof(Axolotl_ctx));
-  printf("sizeof axolotl initmsg: %d\n", sizeof(Axolotl_InitMsg));
+  printf("sizeof axolotl prekey: %d\n", sizeof(Axolotl_PreKey));
   // init long-term identity keys (could also be stored seperately for all new "connections"
   axolotl_genid(&alice_id);
   axolotl_genid(&bob_id);
@@ -38,14 +38,14 @@ int main(void) {
   //randombytes_buf(bob_id.sk,crypto_scalarmult_curve25519_BYTES);
   //crypto_scalarmult_curve25519_base(bob_id.pk, bob_id.sk);
 
-  axolotl_setup(&alice_init, &alice_ctx, &alice_id);
-  axolotl_setup(&bob_init, &bob_ctx, &bob_id);
+  axolotl_prekey(&alice_prekey, &alice_ctx, &alice_id);
+  axolotl_prekey(&bob_prekey, &bob_ctx, &bob_id);
 
   // theoretically alice and bob exchange intit msgs
 
-  // both derive the ctx from the init msg
-  axolotl_handshake(&alice_ctx, &bob_init);
-  axolotl_handshake(&bob_ctx, &alice_init);
+  // both derive the ctx from the prekey msg
+  axolotl_handshake(&alice_ctx, &bob_prekey);
+  axolotl_handshake(&bob_ctx, &alice_prekey);
 
   printf("alice\n");
   print_ctx(&alice_ctx);

@@ -5,18 +5,18 @@
 int main(void) {
   Axolotl_ctx alice_ctx, bob_ctx;
   Axolotl_KeyPair alice_id, bob_id;
-  Axolotl_InitMsg alice_init, bob_init;
+  Axolotl_PreKey alice_prekey, bob_prekey;
 
   // init long-term identity keys
   axolotl_genid(&alice_id);
   axolotl_genid(&bob_id);
 
-  axolotl_setup(&alice_init, &alice_ctx, &alice_id);
-  axolotl_setup(&bob_init, &bob_ctx, &bob_id);
+  axolotl_prekey(&alice_prekey, &alice_ctx, &alice_id);
+  axolotl_prekey(&bob_prekey, &bob_ctx, &bob_id);
 
-  // both derive the ctx from their exchanged init msg
-  axolotl_handshake(&alice_ctx, &bob_init);
-  axolotl_handshake(&bob_ctx, &alice_init);
+  // both derive the ctx from their exchanged prekey msg
+  axolotl_handshake(&alice_ctx, &bob_prekey);
+  axolotl_handshake(&bob_ctx, &alice_prekey);
 
   uint8_t out[4096], out2[4096];
   int outlen,outlen2;

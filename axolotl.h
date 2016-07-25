@@ -74,11 +74,11 @@ typedef struct {
   uint8_t identitykey[crypto_scalarmult_curve25519_BYTES];
   uint8_t ephemeralkey[crypto_scalarmult_curve25519_BYTES];
   uint8_t DHRs[crypto_scalarmult_curve25519_BYTES];
-} __attribute((packed)) Axolotl_InitMsg;
+} __attribute((packed)) Axolotl_PreKey;
 
 void axolotl_genid(Axolotl_KeyPair * keys);
-void axolotl_setup(Axolotl_InitMsg *initmsg, Axolotl_ctx *ctx, const Axolotl_KeyPair *keypair);
-int axolotl_handshake(Axolotl_ctx* ctx, const Axolotl_InitMsg *init);
+void axolotl_prekey(Axolotl_PreKey *prekey, Axolotl_ctx *ctx, const Axolotl_KeyPair *keypair);
+int axolotl_handshake(Axolotl_ctx* ctx, const Axolotl_PreKey *prekey);
 void axolotl_box(Axolotl_ctx *ctx, uint8_t *out, int *out_len, const uint8_t *in, const int in_len);
 int axolotl_box_open(Axolotl_ctx *ctx, uint8_t *out, int *out_len, const uint8_t *in, const int in_len);
 

@@ -41,7 +41,7 @@ void axolotl_genid(Axolotl_KeyPair * keys) {
   crypto_scalarmult_curve25519_base(keys->pk, keys->sk);
 }
 
-void axolotl_setup(Axolotl_InitMsg *initmsg, Axolotl_ctx *ctx, const Axolotl_KeyPair *keypair) {
+void axolotl_prekey(Axolotl_PreKey *prekey, Axolotl_ctx *ctx, const Axolotl_KeyPair *keypair) {
   memset(ctx,0,sizeof(Axolotl_ctx));
   bag_init(ctx->skipped_HK_MK);
 
@@ -49,27 +49,27 @@ void axolotl_setup(Axolotl_InitMsg *initmsg, Axolotl_ctx *ctx, const Axolotl_Key
   memcpy(ctx->dhis.pk, keypair->pk, crypto_scalarmult_curve25519_BYTES);
   memcpy(ctx->dhis.sk, keypair->sk, crypto_scalarmult_curve25519_BYTES);
 
-  // copy pk of identity key to initmsg
-  memcpy(initmsg->identitykey, keypair->pk, crypto_scalarmult_curve25519_BYTES);
+  // copy pk of identity key to prekey
+  memcpy(prekey->identitykey, keypair->pk, crypto_scalarmult_curve25519_BYTES);
 
   // create ephemeral key and store it in ctx
   randombytes_buf(ctx->eph.sk,crypto_scalarmult_curve25519_BYTES);
   crypto_scalarmult_curve25519_base(ctx->eph.pk, ctx->eph.sk);
-  // and publish in initmsg
-  memcpy(initmsg->ephemeralkey, ctx->eph.pk, crypto_scalarmult_curve25519_BYTES);
+  // and publish in prekey
+  memcpy(prekey->ephemeralkey, ctx->eph.pk, crypto_scalarmult_curve25519_BYTES);
 
   // also create DHRs
   randombytes_buf(ctx->dhrs.sk,crypto_scalarmult_curve25519_BYTES);
   crypto_scalarmult_curve25519_base(ctx->dhrs.pk, ctx->dhrs.sk);
-  // and publish in initmsg
-  memcpy(initmsg->DHRs, ctx->dhrs.pk, crypto_scalarmult_curve25519_BYTES);
+  // and publish in prekey
+  memcpy(prekey->DHRs, ctx->dhrs.pk, crypto_scalarmult_curve25519_BYTES);
 }
 
 static int isalice(const Axolotl_ctx *ctx) {
   return memcmp(ctx->dhis.pk, ctx->dhir, crypto_scalarmult_curve25519_BYTES);
 }
 
-static int tripledh(uint8_t *mk, const Axolotl_ctx *ctx, const Axolotl_InitMsg *init) {
+static int tripledh(uint8_t *mk, const Axolotl_ctx *ctx, const Axolotl_PreKey *prekey) {
   /*
   Triple DH performs cross DH between two peers having two keys each:
 
@@ -84,32 +84,32 @@ static int tripledh(uint8_t *mk, const Axolotl_ctx *ctx, const Axolotl_InitMsg *
 
   if(isalice(ctx) <= 0) {
     // 3 DHs
-    if(crypto_scalarmult_curve25519(ptr, ctx->dhis.sk, init->ephemeralkey)!=0) {
+    if(crypto_scalarmult_curve25519(ptr, ctx->dhis.sk, prekey->ephemeralkey)!=0) {
       return 1;
     }
     ptr+=crypto_scalarmult_curve25519_BYTES;
 
-    if(crypto_scalarmult_curve25519(ptr, ctx->eph.sk, init->identitykey)!=0) {
+    if(crypto_scalarmult_curve25519(ptr, ctx->eph.sk, prekey->identitykey)!=0) {
       return 1;
     }
     ptr+=crypto_scalarmult_curve25519_BYTES;
 
-    if(crypto_scalarmult_curve25519(ptr, ctx->eph.sk, init->ephemeralkey)!=0) {
+    if(crypto_scalarmult_curve25519(ptr, ctx->eph.sk, prekey->ephemeralkey)!=0) {
       return 1;
     }
   } else {
     // 3 DHs
-    if(crypto_scalarmult_curve25519(ptr, ctx->eph.sk, init->identitykey)!=0) {
+    if(crypto_scalarmult_curve25519(ptr, ctx->eph.sk, prekey->identitykey)!=0) {
       return 1;
     }
     ptr+=crypto_scalarmult_curve25519_BYTES;
 
-    if(crypto_scalarmult_curve25519(ptr, ctx->dhis.sk, init->ephemeralkey)!=0) {
+    if(crypto_scalarmult_curve25519(ptr, ctx->dhis.sk, prekey->ephemeralkey)!=0) {
       return 1;
     }
     ptr+=crypto_scalarmult_curve25519_BYTES;
 
-    if(crypto_scalarmult_curve25519(ptr, ctx->eph.sk, init->ephemeralkey)!=0) {
+    if(crypto_scalarmult_curve25519(ptr, ctx->eph.sk, prekey->ephemeralkey)!=0) {
       return 1;
     }
   }
@@ -122,7 +122,7 @@ static int tripledh(uint8_t *mk, const Axolotl_ctx *ctx, const Axolotl_InitMsg *
   return 0;
 }
 
-int axolotl_handshake(Axolotl_ctx* ctx, const Axolotl_InitMsg *init) {
+int axolotl_handshake(Axolotl_ctx* ctx, const Axolotl_PreKey *prekey) {
   /*
   as per https://github.com/trevp/axolotl/wiki/newversion (Nov 19, 2013 · 41 revisions)
 
@@ -149,9 +149,9 @@ int axolotl_handshake(Axolotl_ctx* ctx, const Axolotl_InitMsg *init) {
 
   uint8_t mk[crypto_scalarmult_curve25519_BYTES];
   // DHIr = peer identity key
-  memcpy(ctx->dhir, init->identitykey, crypto_scalarmult_curve25519_BYTES);
+  memcpy(ctx->dhir, prekey->identitykey, crypto_scalarmult_curve25519_BYTES);
   // perform triple DH to derive master key
-  if(tripledh(mk, ctx, init)!=0) return 1;
+  if(tripledh(mk, ctx, prekey)!=0) return 1;
   // mk is the shared secret derived of the triple dh which seeds all keys:
 
   // derive root key
@@ -160,7 +160,7 @@ int axolotl_handshake(Axolotl_ctx* ctx, const Axolotl_InitMsg *init) {
                      (uint8_t*) "RK", 2);
   if(isalice(ctx) <= 0) {
     // DHRr = peer DHRs
-    memcpy(ctx->dhrr, init->DHRs, crypto_scalarmult_curve25519_BYTES);
+    memcpy(ctx->dhrr, prekey->DHRs, crypto_scalarmult_curve25519_BYTES);
     // clear DHRs
     memset(ctx->dhrs.sk,0,crypto_scalarmult_curve25519_BYTES);
     memset(ctx->dhrs.pk,0,crypto_scalarmult_curve25519_BYTES);
