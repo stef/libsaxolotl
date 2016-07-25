@@ -490,8 +490,7 @@ int axolotl_box_open(Axolotl_ctx *ctx, uint8_t *out, int *out_len, const uint8_t
 #endif
   if(crypto_secretbox_open(headers, paddedhcrypt, sizeof(paddedhcrypt), hnonce, ctx->hkr)==0) {
     memcpy((uint8_t*) &np, headers+32, sizeof(long long));
-    // CKp, MK = self.stage_skipped_keys(self.HKr, self.Nr, Np, self.CKr)
-    //void stage_skipped_keys(uint8_t* ckp, uint8_t* mk, const uint8_t *hk, const long long nr, const long long np, const uint8_t *ck) {
+    // CKp, MK = stage_skipped_keys(HKr, Nr, Np, CKr)
     stage_skipped_keys(ckp, mk, ctx->nr, np, ctx->ckr, stagedkeys);
 #if AXOLOTL_DEBUG
       print_key("mk", mk);
@@ -501,7 +500,6 @@ int axolotl_box_open(Axolotl_ctx *ctx, uint8_t *out, int *out_len, const uint8_t
       printf("\n");
 #endif
     if(crypto_secretbox_open(paddedout, paddedmcrypt, sizeof(paddedmcrypt), mnonce, mk)!=0) {
-      // todo fail!!!!
 #if AXOLOTL_DEBUG
       printf("mcrypt err\n");
 #endif
@@ -547,7 +545,6 @@ int axolotl_box_open(Axolotl_ctx *ctx, uint8_t *out, int *out_len, const uint8_t
     }
   } else {
     if(crypto_secretbox_open(headers, paddedhcrypt, sizeof(paddedhcrypt), hnonce, ctx->nhkr)!=0) {
-      // todo fail!!!!
 #if AXOLOTL_DEBUG
       printf("hcrypt err\n");
 #endif
@@ -558,8 +555,7 @@ int axolotl_box_open(Axolotl_ctx *ctx, uint8_t *out, int *out_len, const uint8_t
     memcpy((uint8_t*) &pnp, headers+32+sizeof(long long), sizeof(long long));
     uint8_t dhrp[crypto_secretbox_KEYBYTES];
     memcpy(dhrp, headers+32+sizeof(long long)*2, crypto_secretbox_KEYBYTES);
-    // self.stage_skipped_keys(self.HKr, self.Nr, PNp, self.CKr)
-    //void stage_skipped_keys(uint8_t* ckp, uint8_t* mk, const uint8_t *hk, const long long nr, const long long np, const uint8_t *ck) {
+    // stage_skipped_keys(HKr, Nr, PNp, CKr)
     stage_skipped_keys(NULL, NULL, ctx->nr, pnp, ctx->ckr, stagedkeys);
     uint8_t rkp[crypto_secretbox_KEYBYTES];
     if(crypto_scalarmult_curve25519(tmp, ctx->dhrs.sk, ctx->dhrr)!=0) {
@@ -589,8 +585,7 @@ int axolotl_box_open(Axolotl_ctx *ctx, uint8_t *out, int *out_len, const uint8_t
                          rkp, crypto_secretbox_KEYBYTES,  // msg
                          (uint8_t*) "CKs", 3);            // no key
     }
-    // CKp, MK = self.stage_skipped_keys(HKp, 0, Np, CKp)
-    //void stage_skipped_keys(uint8_t* ckp, uint8_t* mk, const uint8_t *hk, const long long nr, const long long np, const uint8_t *ck) {
+    // CKp, MK = stage_skipped_keys(HKp, 0, Np, CKp)
     stage_skipped_keys(ckp, mk, 0LL, np, ckp, stagedkeys);
 
 #if AXOLOTL_DEBUG
@@ -601,7 +596,6 @@ int axolotl_box_open(Axolotl_ctx *ctx, uint8_t *out, int *out_len, const uint8_t
       printf("\n");
 #endif
     if(crypto_secretbox_open(paddedout, paddedmcrypt, sizeof(paddedmcrypt), mnonce, mk)!=0) {
-      // todo fail!!!!
 #if AXOLOTL_DEBUG
       printf("mcrypt err\n");
 #endif
