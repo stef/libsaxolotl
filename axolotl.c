@@ -384,7 +384,7 @@ static void stage_skipped_keys(uint8_t* ckp, uint8_t* mk,  // output
                          (uint8_t*) "MK", 2);              // "MK")
     crypto_generichash(_ckp, crypto_secretbox_KEYBYTES,   // mk=
                        _ckp, crypto_secretbox_KEYBYTES,   // h(ck,
-                       (uint8_t*) "CK", 2);               // "MK")
+                       (uint8_t*) "CK", 2);               // "CK")
   }
   if(mk!=NULL) {
 #if AXOLOTL_DEBUG
@@ -397,7 +397,7 @@ static void stage_skipped_keys(uint8_t* ckp, uint8_t* mk,  // output
   if(ckp!=NULL) {
     crypto_generichash(ckp, crypto_secretbox_KEYBYTES,    // ck=
                        _ckp, crypto_secretbox_KEYBYTES,   // h(ck,
-                       (uint8_t*) "CK", 2);               // "MK")
+                       (uint8_t*) "CK", 2);               // "CK")
   }
 }
 
